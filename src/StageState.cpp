@@ -64,8 +64,8 @@ void StageState::LoadAssets() {
 
     // Mapa da primeira fase usando o tileset de ruas do Path to Delivery.
     GameObject* mapObject = new GameObject();
-    tileSet = new TileSet(128, 128, "recursos/img/RuasV1.png");
-    tileMap = new TileMap(*mapObject, "recursos/map/cidade.txt", tileSet);
+    tileSet = new TileSet(128, 128, "recursos/img/v2RuasSpritesheet.png", 512, 512);
+    tileMap = new TileMap(*mapObject, "recursos/map/cidade2.txt", tileSet);
     mapObject->AddComponent(tileMap);
     mapObject->box.x = 0;
     mapObject->box.y = 0;
