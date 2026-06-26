@@ -5,7 +5,9 @@
 enum class VehicleType {
     HARLEY,
     VESPA,
-    BUGGY
+    BUGGY,
+    UNO,
+    MUSTANG
 };
 
 class DeliveryPlayer : public Component {

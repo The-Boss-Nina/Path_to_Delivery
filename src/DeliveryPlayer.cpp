@@ -28,6 +28,16 @@ void DeliveryPlayer::Start() {
             v->SetAcceleration(280.0f);
             v->SetTurnSpeed(100.0f);
             break;
+        case VehicleType::UNO:
+            v->SetMaxSpeed(330.0f);
+            v->SetAcceleration(200.0f);
+            v->SetTurnSpeed(140.0f);
+            break;
+        case VehicleType::MUSTANG:
+            v->SetMaxSpeed(380.0f);
+            v->SetAcceleration(240.0f);
+            v->SetTurnSpeed(110.0f);
+            break;
     }
 }
 

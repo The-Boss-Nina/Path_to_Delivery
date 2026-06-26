@@ -87,23 +87,36 @@ void StageState::LoadAssets() {
     CreateSpriteObject(*this, "recursos/img/bloqueio.png", 650, 1750, 9, 1, 4);
 
     // Veículos simples, ainda estáticos nesta entrega de 30%.
-    CreateSpriteObject(*this, "recursos/img/BuggyV1.png", 1360, 490, 9, 1, 6);
-    CreateSpriteObject(*this, "recursos/img/V3_mustang0008-sheet.png", 1280, 128, 10, 1, 4);
+    CreateSpriteObject(*this, "recursos/img/V3vezpa.png", 512, 128, 10, 3, 4);
+    CreateSpriteObject(*this, "recursos/img/V3uno.png", 512, 128, 10, 3, 4);
+    CreateSpriteObject(*this, "recursos/img/V3_harley_sheet.png", 1360, 490, 10, 1, 10);
+    CreateSpriteObject(*this, "recursos/img/V3_mustang0008-sheet.png", 1280, 128, 10, 1, 10);
 
     // Jogador principal: o sprite depende da escolha feita na tela anterior.
     std::string playerSpritePath = "recursos/img/HarleyV1.png";
     int playerFrameCountW = 8;
+    int playerFrameCountH = 1;
 
     if (selectedVehicle == VehicleType::VESPA) {
+        playerSpritePath = "recursos/img/V3vezpa.png";
+        playerFrameCountW = 4;
+        playerFrameCountH = 3;
+    } else if (selectedVehicle == VehicleType::UNO) {
+        playerSpritePath = "recursos/img/V3uno.png";
+        playerFrameCountW = 4;
+        playerFrameCountH = 3;
+    } else if (selectedVehicle == VehicleType::HARLEY) {
+        playerSpritePath = "recursos/img/V3_harley_sheet.png";
+        playerFrameCountW = 10;
+        playerFrameCountH = 1;
+    } else if (selectedVehicle == VehicleType::MUSTANG) {
         playerSpritePath = "recursos/img/V3_mustang0008-sheet.png";
         playerFrameCountW = 10;
-    } else if (selectedVehicle == VehicleType::BUGGY) {
-        playerSpritePath = "recursos/img/BuggyV1.png";
-        playerFrameCountW = 9;
+        playerFrameCountH = 1;
     }
 
     GameObject* player = new GameObject();
-    player->AddComponent(new Vehicle(*player, playerSpritePath, true));
+    player->AddComponent(new Vehicle(*player, playerSpritePath, true, playerFrameCountW, playerFrameCountH));
     player->AddComponent(new DeliveryPlayer(*player, selectedVehicle));
     player->box.x = 760.0f;
     player->box.y = 1180.0f;

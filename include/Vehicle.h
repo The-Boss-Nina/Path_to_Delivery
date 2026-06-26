@@ -19,7 +19,7 @@ class Vehicle : public Component {
                 Vec2 pos;
         };
  
-        Vehicle(GameObject& associated, std::string sprite, bool isPlayer, int frameCountW = 9);
+        Vehicle(GameObject& associated, std::string sprite, bool isPlayer, int frameCountW = 9, int frameCountH = 1);
         ~Vehicle();
         void Start() override;
         void Update(float dt) override;
@@ -38,6 +38,7 @@ class Vehicle : public Component {
         // Sprite
         std::string spritePath;
         int spriteFrameCountW;
+        int spriteFrameCountH;
  
         // Física do carro
         float currentSpeed;      // velocidade escalar atual (px/s)

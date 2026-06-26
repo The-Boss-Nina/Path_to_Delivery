@@ -14,10 +14,11 @@
 
 Vehicle* Vehicle::player = nullptr;
 
-Vehicle::Vehicle(GameObject& associated, std::string sprite, bool isPlayer, int frameCountW)
+Vehicle::Vehicle(GameObject& associated, std::string sprite, bool isPlayer, int frameCountW, int frameCountH)
     : Component(associated),
       spritePath(sprite),
       spriteFrameCountW(frameCountW),
+      spriteFrameCountH(frameCountH),
       currentSpeed(0.0f),
       maxSpeed(300.0f),
       maxReverseSpeed(120.0f),
@@ -30,7 +31,7 @@ Vehicle::Vehicle(GameObject& associated, std::string sprite, bool isPlayer, int 
       inputLeft(false), inputRight(false),
       hp(100), isPlayer(isPlayer) {
 
-    SpriteRenderer* sr = new SpriteRenderer(associated, spritePath, spriteFrameCountW, 1);
+    SpriteRenderer* sr = new SpriteRenderer(associated, spritePath, spriteFrameCountW, spriteFrameCountH);
     sr->SetFrame(0);
     associated.AddComponent(sr);
 
