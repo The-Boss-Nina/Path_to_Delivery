@@ -132,8 +132,15 @@ void Vehicle::Update(float dt) {
     nextY.y += dy;
     if (!state.IsCollidingWithTileMap(nextY)) {
         associated.box.y += dy;
-    } else {
+    } else if (hitTimer.Get() > 0.5f) {
+        if (currentSpeed > 200.0f) {
+            Damage(10); // Dano ao bater em um obstáculo
+        }
+        else{
+            Damage(5); // Dano ao bater em um obstáculo
+        }
         currentSpeed *= -0.3f;
+        hitTimer.Restart();
     }
 
     // setar posição da animação
@@ -177,4 +184,13 @@ void Vehicle::NotifyCollision(GameObject& other) {
 
 void Vehicle::Damage(int damage) {
     hp -= damage;
+    if (hp <= 0) {
+        if (isPlayer) {
+            Camera::Unfollow();
+            player = nullptr;
+            deathTimer.Restart();
+            associated.RequestDelete();
+        }
+        return;
+    }
 }

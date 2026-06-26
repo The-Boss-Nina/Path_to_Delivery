@@ -6,6 +6,7 @@
 
 Vec2 Camera::pos(0.0f, 0.0f);
 Vec2 Camera::speed(0.0f, 0.0f);
+Vec2 Camera::bounds(0.0f, 0.0f);
 GameObject* Camera::focus = nullptr;
 
 void Camera::Follow(GameObject* newFocus) {
@@ -14,6 +15,11 @@ void Camera::Follow(GameObject* newFocus) {
 
 void Camera::Unfollow() {
     focus = nullptr;
+}
+
+void Camera::SetBounds(float width, float height) {
+    bounds.x = width;
+    bounds.y = height;
 }
 
 void Camera::Update(float dt) {
@@ -40,14 +46,17 @@ void Camera::Update(float dt) {
         pos = pos + speed * dt;
     }
 
-    const float mapW = 40.0f * 64.0f;
-    const float mapH = 40.0f * 64.0f;
+    float mapW = bounds.x;
+    float mapH = bounds.y;
+
+    if (mapW <= 0.0f) mapW = static_cast<float>(w);
+    if (mapH <= 0.0f) mapH = static_cast<float>(h);
 
     if (pos.x < 0.0f) pos.x = 0.0f;
     if (pos.y < 0.0f) pos.y = 0.0f;
 
-    if (pos.x > mapW - w) pos.x = mapW - w;
-    if (pos.y > mapH - h) pos.y = mapH - h;
+    if (pos.x > mapW - w) pos.x = (mapW - w > 0.0f ? mapW - w : 0.0f);
+    if (pos.y > mapH - h) pos.y = (mapH - h > 0.0f ? mapH - h : 0.0f);
 
     if (pos.x < 0.0f) pos.x = 0.0f;
     if (pos.y < 0.0f) pos.y = 0.0f;

@@ -70,6 +70,10 @@ void StageState::LoadAssets() {
     mapObject->box.y = 0;
     AddObject(mapObject);
 
+    const float mapWidthPx = static_cast<float>(tileMap->GetWidth() * tileMap->GetTileWidth());
+    const float mapHeightPx = static_cast<float>(tileMap->GetHeight() * tileMap->GetTileHeight());
+    Camera::SetBounds(mapWidthPx, mapHeightPx);
+
     // Prédios e elementos de cenário.
     CreateSpriteObject(*this, "recursos/img/predio4andaresV1.png", 120, 110);
     CreateSpriteObject(*this, "recursos/img/predio2andaresV1.png", 900, 120);

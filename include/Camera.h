@@ -8,6 +8,7 @@ class Camera {
 public:
     static void Follow(GameObject* newFocus);
     static void Unfollow();
+    static void SetBounds(float width, float height);
     static void Update(float dt);
 
     static Vec2 pos;
@@ -15,4 +16,5 @@ public:
 
 private:
     static GameObject* focus;
+    static Vec2 bounds;
 };
