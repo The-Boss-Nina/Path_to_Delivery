@@ -2,6 +2,7 @@
 #include "Camera.h"
 #include "Delivery.h"
 #include "Gps.h"
+#include "Speedometer.h"
 #include "DeliveryPlayer.h"
 #include "Game.h"
 #include "GameObject.h"
@@ -10,7 +11,9 @@
 #include "TileMap.h"
 #include "TileSet.h"
 #include <SDL.h>
+#include <algorithm>
 #include <string>
+#include <vector>
 #include "Vehicle.h"
 #include "Music.h"
 
@@ -41,6 +44,55 @@ static GameObject* CreateSpriteObject(State& state,
     return object;
 }
 
+// Varre a camada de colisão (camada 1) do TileMap e agrupa os quarteirões marcados com o tile 12 (ver cidade2.txt)
+static std::vector<Rect> FindBuildingBlocks(TileMap* tileMap) {
+    std::vector<Rect> blocks;
+    if (!tileMap) return blocks;
+
+    int width = tileMap->GetWidth();
+    int height = tileMap->GetHeight();
+    std::vector<std::vector<bool>> visited(height, std::vector<bool>(width, false));
+    const int dx[4] = {1, -1, 0, 0};
+    const int dy[4] = {0, 0, 1, -1};
+
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            if (visited[y][x] || tileMap->At(x, y, 1) != 12) continue;
+
+            std::vector<std::pair<int, int>> stack{{x, y}};
+            visited[y][x] = true;
+            int minX = x, maxX = x, minY = y, maxY = y;
+
+            while (!stack.empty()) {
+                auto [cx, cy] = stack.back();
+                stack.pop_back();
+                minX = std::min(minX, cx);
+                maxX = std::max(maxX, cx);
+                minY = std::min(minY, cy);
+                maxY = std::max(maxY, cy);
+
+                for (int d = 0; d < 4; ++d) {
+                    int nx = cx + dx[d];
+                    int ny = cy + dy[d];
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height &&
+                        !visited[ny][nx] && tileMap->At(nx, ny, 1) == 12) {
+                        visited[ny][nx] = true;
+                        stack.push_back({nx, ny});
+                    }
+                }
+            }
+
+            blocks.emplace_back(
+                static_cast<float>(minX * tileMap->GetTileWidth()),
+                static_cast<float>(minY * tileMap->GetTileHeight()),
+                static_cast<float>((maxX - minX + 1) * tileMap->GetTileWidth()),
+                static_cast<float>((maxY - minY + 1) * tileMap->GetTileHeight()));
+        }
+    }
+
+    return blocks;
+}
+
 void StageState::Start() {
     if (started) return;
 
@@ -66,7 +118,7 @@ void StageState::LoadAssets() {
 
     // Mapa da primeira fase usando o tileset de ruas do Path to Delivery.
     GameObject* mapObject = new GameObject();
-    tileSet = new TileSet(128, 128, "recursos/img/v2RuasSpritesheet.png", 512, 512);
+    tileSet = new TileSet(512, 512, "recursos/img/v2RuasSpritesheet.png", 512, 512);
     tileMap = new TileMap(*mapObject, "recursos/map/cidade2.txt", tileSet);
     mapObject->AddComponent(tileMap);
     mapObject->box.x = 0;
@@ -77,27 +129,40 @@ void StageState::LoadAssets() {
     const float mapHeightPx = static_cast<float>(tileMap->GetHeight() * tileMap->GetTileHeight());
     Camera::SetBounds(mapWidthPx, mapHeightPx);
 
-    // Prédios e elementos de cenário.
-    CreateSpriteObject(*this, "recursos/img/predio4andaresV1.png", 120, 110);
-    CreateSpriteObject(*this, "recursos/img/predio2andaresV1.png", 900, 120);
-    CreateSpriteObject(*this, "recursos/img/predio4andaresV1.png", 2100, 110);
-    CreateSpriteObject(*this, "recursos/img/predio2andaresV1.png", 3000, 120);
+    // O cenário e o spawn do jogador abaixo foram posicionados quando o
+    // tileset renderizava a 128px/tile. Escalamos essas coordenadas pelo
+    // tamanho real do tile configurado acima, para continuarem alinhadas
+    // com as ruas independente do tamanho do tile usado.
+    const float kLegacyTileSize = 128.0f;
+    const float worldScale = static_cast<float>(tileMap->GetTileWidth()) / kLegacyTileSize;
 
-    CreateSpriteObject(*this, "recursos/img/predio2andaresV1.png", 150, 880);
-    CreateSpriteObject(*this, "recursos/img/predio4andaresV1.png", 950, 830);
-    CreateSpriteObject(*this, "recursos/img/predio2andaresV1.png", 2250, 900);
-    CreateSpriteObject(*this, "recursos/img/predio4andaresV1.png", 3100, 830);
 
-    CreateSpriteObject(*this, "recursos/img/farol.png", 760, 470);
-    CreateSpriteObject(*this, "recursos/img/farol.png", 1780, 1230);
-    CreateSpriteObject(*this, "recursos/img/bloqueio.png", 2450, 720, 9, 1, 0);
-    CreateSpriteObject(*this, "recursos/img/bloqueio.png", 650, 1750, 9, 1, 4);
+    const char* buildingSprites[] = {
+        "recursos/img/predio2andaresV1.png",
+        "recursos/img/predio4andaresV1.png"
+    };
+    const float buildingSourceWidth = 512.0f;
+    const float buildingSourceHeight = 256.0f;
+    std::vector<Rect> buildingBlocks = FindBuildingBlocks(tileMap);
+    for (size_t i = 0; i < buildingBlocks.size(); ++i) {
+        const Rect& block = buildingBlocks[i];
+        CreateSpriteObject(*this, buildingSprites[i % 2], block.x, block.y,
+                            1, 1, 0,
+                            block.w / buildingSourceWidth,
+                            block.h / buildingSourceHeight);
+    }
+
+    // Elementos de cenário.
+    CreateSpriteObject(*this, "recursos/img/farol.png", 760 * worldScale, 470 * worldScale);
+    CreateSpriteObject(*this, "recursos/img/farol.png", 1780 * worldScale, 1230 * worldScale);
+    CreateSpriteObject(*this, "recursos/img/bloqueio.png", 2450 * worldScale, 720 * worldScale, 9, 1, 0);
+    CreateSpriteObject(*this, "recursos/img/bloqueio.png", 650 * worldScale, 1750 * worldScale, 9, 1, 4);
 
     // Veículos simples, ainda estáticos nesta entrega de 30%.
-    CreateSpriteObject(*this, "recursos/img/V3vezpa.png", 512, 128, 10, 3, 4);
-    CreateSpriteObject(*this, "recursos/img/V3uno.png", 512, 128, 10, 3, 4);
-    CreateSpriteObject(*this, "recursos/img/V3_harley_sheet.png", 1360, 490, 10, 1, 10);
-    CreateSpriteObject(*this, "recursos/img/V3_mustang0008-sheet.png", 1280, 128, 10, 1, 10);
+    CreateSpriteObject(*this, "recursos/img/V3vezpa.png", 512 * worldScale, 128 * worldScale, 4, 3, 4);
+    CreateSpriteObject(*this, "recursos/img/V3uno.png", 512 * worldScale, 128 * worldScale, 4, 3, 4);
+    CreateSpriteObject(*this, "recursos/img/V3_harley_sheet.png", 1360 * worldScale, 490 * worldScale, 10, 1, 9);
+    CreateSpriteObject(*this, "recursos/img/V3_mustang0008-sheet.png", 1280 * worldScale, 128 * worldScale, 10, 1, 9);
 
     // Jogador principal: o sprite depende da escolha feita na tela anterior.
     std::string playerSpritePath = "recursos/img/HarleyV1.png";
@@ -125,8 +190,8 @@ void StageState::LoadAssets() {
     GameObject* player = new GameObject();
     player->AddComponent(new Vehicle(*player, playerSpritePath, true, playerFrameCountW, playerFrameCountH));
     player->AddComponent(new DeliveryPlayer(*player, selectedVehicle));
-    player->box.x = 760.0f;
-    player->box.y = 1180.0f;
+    player->box.x = 780.0f * worldScale;
+    player->box.y = 1180.0f * worldScale;
     AddObject(player);
 
     Camera::Follow(player);
@@ -147,6 +212,17 @@ void StageState::LoadAssets() {
     gpsObj->box.y = 720.0f - gpsObj->box.h - 10.0f;
     gpsObj->AddComponent(new Gps(*gpsObj, delivery));
     AddObject(gpsObj);
+
+    // Widget do velocímetro — renderizado fixo no canto inferior direito.
+    GameObject* speedoObj = new GameObject();
+    SpriteRenderer* speedoSr = new SpriteRenderer(*speedoObj, "recursos/img/velocimetro.png", 5, 5);
+    speedoSr->SetCameraFollower(true);
+    speedoSr->SetFrame(0);
+    speedoObj->AddComponent(speedoSr);
+    speedoObj->box.x = 1280.0f - speedoObj->box.w - 10.0f;
+    speedoObj->box.y = 720.0f - speedoObj->box.h - 10.0f;
+    speedoObj->AddComponent(new Speedometer(*speedoObj, Vehicle::player));
+    AddObject(speedoObj);
 
     backgroundMusic.Open("recursos/sound/FASE.mp3");
     backgroundMusic.Play(-1);

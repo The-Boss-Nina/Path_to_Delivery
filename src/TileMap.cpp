@@ -54,9 +54,7 @@ void TileMap::Update(float dt) {
 }
 
 void TileMap::Render() {
-    for (int layer = 0; layer < mapDepth; ++layer) {
-        RenderLayer(layer);
-    }
+    RenderLayer(0);
 }
 
 void TileMap::RenderLayer(int layer) {

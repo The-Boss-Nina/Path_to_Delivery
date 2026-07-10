@@ -34,6 +34,8 @@ class Vehicle : public Component {
         void SetMaxSpeed(float v)      { maxSpeed = v; }
         void SetAcceleration(float v)  { acceleration = v; }
         void SetTurnSpeed(float v)     { turnSpeed = v; }
+        float GetSpeed() const         { return currentSpeed; }
+        float GetMaxSpeed() const      { return maxSpeed; }
         Sound engineSound;
         Sound crashSound;
         Sound brakeSound;

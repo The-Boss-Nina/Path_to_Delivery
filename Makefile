@@ -31,7 +31,10 @@ SRCS = $(SRC_DIR)/main.cpp \
        $(SRC_DIR)/Collider.cpp \
        $(SRC_DIR)/Collision.cpp \
        $(SRC_DIR)/Delivery.cpp \
-       $(SRC_DIR)/Gps.cpp
+       $(SRC_DIR)/Gps.cpp \
+       $(SRC_DIR)/Speedometer.cpp
+
+# CITY_TARGET = GenerateCity
 
 all: $(TARGET)
 
@@ -41,7 +44,15 @@ $(TARGET): $(SRCS)
 run: all
 	./$(TARGET)
 
-clean:
-	rm -f $(TARGET) Game.exe
+# # Ferramenta standalone (sem SDL2) que gera recursos/map/cidade_criada.txt.
+# # Uso: make generate-city [ARGS="saida.txt largura altura semente"]
+# $(CITY_TARGET): $(SRC_DIR)/GenerateCity.cpp include/GenerateCity.h
+# 	$(CXX) -Wall -I./include $(SRC_DIR)/GenerateCity.cpp -o $(CITY_TARGET)
 
-.PHONY: all clean run
+# generate-city: $(CITY_TARGET)
+# 	./$(CITY_TARGET) $(ARGS)
+
+clean:
+	rm -f $(TARGET) Game.exe $(CITY_TARGET)
+
+# .PHONY: all clean run generate-city

@@ -1,14 +1,16 @@
-#ifndef SPEEDOMETER_H
-#define SPEEDOMETER_H
+#pragma once
 
-class Speedometer {
+#include "Component.h"
+
+class Vehicle;
+
+class Speedometer : public Component {
 public:
-    Speedometer();
-    void updateSpeed(float speed);
-    float getSpeed() const;
+    Speedometer(GameObject& associated, Vehicle* vehicle);
+
+    void Update(float dt) override;
+    void Render() override;
 
 private:
-    float speed_;
+    Vehicle* vehicle;
 };
-
-#endif // SPEEDOMETER_H

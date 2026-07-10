@@ -14,35 +14,35 @@ void DeliveryPlayer::Start() {
     // Cada veículo tem características próprias de física.
     switch (type) {
         case VehicleType::HARLEY:
-            v->SetMaxSpeed(360.0f);
+            v->SetMaxSpeed(720.0f);
             v->SetAcceleration(220.0f);
             v->SetTurnSpeed(130.0f);
             v->engineSound.Open("recursos/sound/MOTO1.wav");
             v->brakeSound.Open("recursos/sound/FREIO.wav");
             break;
         case VehicleType::VESPA:
-            v->SetMaxSpeed(320.0f);
+            v->SetMaxSpeed(640.0f);
             v->SetAcceleration(180.0f);
             v->SetTurnSpeed(150.0f);
             v->engineSound.Open("recursos/sound/MOTO2.wav");
             v->brakeSound.Open("recursos/sound/FREIO.wav");
             break;
         case VehicleType::BUGGY:
-            v->SetMaxSpeed(260.0f);
+            v->SetMaxSpeed(520.0f);
             v->SetAcceleration(280.0f);
             v->SetTurnSpeed(100.0f);
             v->engineSound.Open("recursos/sound/CARRO1.wav");
             v->brakeSound.Open("recursos/sound/FREIO.wav");
             break;
         case VehicleType::UNO:
-            v->SetMaxSpeed(330.0f);
+            v->SetMaxSpeed(660.0f);
             v->SetAcceleration(200.0f);
             v->SetTurnSpeed(140.0f);
             v->engineSound.Open("recursos/sound/CARRO1.wav");
             v->brakeSound.Open("recursos/sound/FREIO.wav");
             break;
         case VehicleType::MUSTANG:
-            v->SetMaxSpeed(380.0f);
+            v->SetMaxSpeed(760.0f);
             v->SetAcceleration(240.0f);
             v->SetTurnSpeed(110.0f);
             v->engineSound.Open("recursos/sound/CARRO3.wav");
